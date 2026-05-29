@@ -19,7 +19,7 @@ class Venue(TimeStampedModel):
     capacity = models.PositiveIntegerField()
 
     class Meta:
-        db_table = "venue"
+        db_table = '"content"."venue"'
         ordering = ["name"]
 
     def __str__(self):
@@ -36,7 +36,7 @@ class Event(TimeStampedModel):
     venue = models.ForeignKey(
         Venue,
         on_delete=models.PROTECT,
-        related_name="events"
+        related_name="events",
     )
     title = models.CharField(max_length=200)
     description = models.TextField(blank=True)
@@ -45,12 +45,17 @@ class Event(TimeStampedModel):
     status = models.CharField(
         max_length=20,
         choices=Status.choices,
-        default=Status.PUBLISHED
+        default=Status.PUBLISHED,
     )
 
     class Meta:
-        db_table = "event"
+        db_table = '"content"."event"'
         ordering = ["starts_at"]
+        indexes = [
+            models.Index(fields=["starts_at"]),
+            models.Index(fields=["status"]),
+            models.Index(fields=["title"]),
+        ]
 
     def __str__(self):
         return self.title
@@ -61,7 +66,7 @@ class TicketType(TimeStampedModel):
     event = models.ForeignKey(
         Event,
         on_delete=models.CASCADE,
-        related_name="ticket_types"
+        related_name="ticket_types",
     )
     name = models.CharField(max_length=100)
     price = models.DecimalField(max_digits=10, decimal_places=2)
@@ -70,8 +75,12 @@ class TicketType(TimeStampedModel):
     sales_end = models.DateTimeField(null=True, blank=True)
 
     class Meta:
-        db_table = "ticket_type"
+        db_table = '"content"."ticket_type"'
         ordering = ["price"]
+        indexes = [
+            models.Index(fields=["event"]),
+            models.Index(fields=["price"]),
+        ]
 
     def __str__(self):
         return f"{self.event.title} - {self.name}"
@@ -89,12 +98,16 @@ class Order(TimeStampedModel):
     status = models.CharField(
         max_length=20,
         choices=Status.choices,
-        default=Status.PAID
+        default=Status.PAID,
     )
 
     class Meta:
-        db_table = "order"
+        db_table = '"content"."ticket_order"'
         ordering = ["-created_at"]
+        indexes = [
+            models.Index(fields=["status"]),
+            models.Index(fields=["buyer_email"]),
+        ]
 
     def __str__(self):
         return f"{self.buyer_name} - {self.status}"
@@ -110,22 +123,26 @@ class Ticket(TimeStampedModel):
     order = models.ForeignKey(
         Order,
         on_delete=models.CASCADE,
-        related_name="tickets"
+        related_name="tickets",
     )
     ticket_type = models.ForeignKey(
         TicketType,
         on_delete=models.PROTECT,
-        related_name="tickets"
+        related_name="tickets",
     )
     status = models.CharField(
         max_length=20,
         choices=Status.choices,
-        default=Status.ACTIVE
+        default=Status.ACTIVE,
     )
 
     class Meta:
-        db_table = "ticket"
+        db_table = '"content"."ticket"'
         ordering = ["-created_at"]
+        indexes = [
+            models.Index(fields=["status"]),
+            models.Index(fields=["ticket_type"]),
+        ]
 
     def __str__(self):
         return f"{self.ticket_type.name} - {self.status}"
