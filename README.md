@@ -116,12 +116,3 @@ docker compose exec fastapi pytest
 Desde un entorno local con las dependencias instaladas, también se puede ejecutar:
 
 pytest
-
-## Diagramas
-
-Ver:
-
-- `diagrams/er_diagram.md`
-- `diagrams/uml_class_diagram.md`
-- `diagrams/c4_diagrams.md`
-- `diagrams/ddl.md`
